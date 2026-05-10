@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iron Discipline: The System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a0a2e;
+            --bg2: #120720;
+            --card: #241040;
+            --card2: #1e0d35;
+            --a1: #c084fc;
+            --a2: #e879f9;
+            --a3: #fbbf24;
+            --a4: #fb7185;
+            --text: #f3e8ff;
+            --muted: #7c5f9a;
+            --border: rgba(192,132,252,0.15);
+            --card-border: rgba(192,132,252,0.08);
+            --font-title: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-accent: 'Playfair Display', serif;
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        body {
+            margin: 0;
+            background: var(--bg2);
+            color: var(--text);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .page {
+            display: none;
+            width: 900px;
+            max-width: 95%;
+            background: var(--bg);
+            margin: 40px 0 100px;
+            border-radius: 22px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 0 100px rgba(192,132,252,0.05);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeSlide .4s ease forwards;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .inner { padding: 52px 56px 58px; position: relative; z-index: 2; }
+
+        h1, h2, h3 { font-family: var(--font-title); text-transform: uppercase; margin: 0; line-height: 1.1; }
+        p { line-height: 1.6; font-weight: 300; }
+
+        .badge {
+            font-family: var(--font-title);
+            font-size: 10px;
+            letter-spacing: 2px;
+            border-radius: 30px;
+            padding: 5px 14px;
+            background: linear-gradient(90deg, var(--a1), var(--a2));
+            color: var(--bg);
+            display: inline-block;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 22px 20px;
+            height: 100%;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(192,132,252,0.03);
+        }
+
+        .card-title {
+            font-family: var(--font-title);
+            font-size: 13px;
+            color: var(--a1);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 25px 0; }
+        .stat-box { text-align: center; }
+        .stat-num { font-family: var(--font-title); font-size: 32px; color: var(--a1); display: block; line-height: 1; }
+        .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .check-item {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            background: var(--card2);
+            border: 1px solid var(--card-border);
+            border-left: 3px solid var(--a1);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .check-num { font-family: var(--font-title); font-size: 20px; color: var(--a1); min-width: 25px; }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(251,191,36,0.05));
+            border: 1px solid rgba(192,132,252,0.2);
+            padding: 24px;
+            border-radius: 14px;
+            margin: 25px 0;
+        }
+
+        .cta-box {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 45px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .cta-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--a1), var(--a2));
+            color: var(--bg);
+            padding: 16px 42px;
+            border-radius: 40px;
+            font-family: var(--font-title);
+            font-size: 16px;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .cta-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 30px;
+            background: rgba(36, 16, 64, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--muted);
+            color: var(--text);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: var(--font-title);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .nav-btn:hover { border-color: var(--a1); color: var(--a1); }
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); cursor: pointer; }
+        .dot.active { background: var(--a1); box-shadow: 0 0 10px var(--a1); }
+        .page-counter-top {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-family: var(--font-title);
+            font-size: 14px;
+            color: var(--muted);
+            letter-spacing: 2px;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+        .cover-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 50% 30%, #2d1060 0%, #1a0a2e 60%);
+            z-index: 1;
+        }
+        .stars-container { position: absolute; width: 100%; height: 100%; overflow: hidden; opacity: 0.4; }
+
+        @media (max-width: 920px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .inner { padding: 40px 25px; }
+            .page { margin: 10px 0 80px; }
+            .page-counter-top { top: 15px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 01: COVER -->
+    <div class="page active" id="p1">
+        <div class="cover-bg">
+            <div class="stars-container">
+                <svg width="100%" height="100%">
+                    <circle cx="10%" cy="20%" r="1" fill="white"><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" /></circle>
+                    <circle cx="50%" cy="40%" r="1.5" fill="var(--a1)"><animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" /></circle>
+                    <circle cx="80%" cy="15%" r="1" fill="white"><animate attributeName="opacity" values="0;1;0" dur="5s" repeatCount="indefinite" /></circle>
+                    <circle cx="30%" cy="70%" r="1" fill="var(--a2)"><animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" /></circle>
+                    <circle cx="90%" cy="80%" r="1.2" fill="white"><animate attributeName="opacity" values="0;1;0" dur="6s" repeatCount="indefinite" /></circle>
+                </svg>
+            </div>
+            <div style="position:absolute; width:400px; height:400px; background:radial-gradient(circle, var(--a1) 0%, transparent 70%); filter:blur(100px); opacity:0.1; top:-100px; left:-100px;"></div>
+        </div>
+        <div class="inner" style="min-height: 650px; display: flex; align-items: center;">
+            <div class="page-counter-top">01 / 16</div>
+            <div class="grid-2" style="align-items: center; width: 100%;">
+                <div>
+                    <div class="badge">Performance Protocol</div>
+                    <h1 style="font-size: 58px; margin-bottom: 20px; letter-spacing: -1px;">IRON <br><span style="color: var(--a1);">DISCIPLINE</span></h1>
+                    <p style="font-family: var(--font-accent); font-size: 22px; color: var(--a2); margin-bottom: 35px; font-style: italic;">
+                        Kill the motivation myth. Build a system that functions when you don't want to.
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px;">
+                        <span style="border: 1px solid var(--border); background: rgba(192,132,252,0.05); padding: 8px 15px; border-radius: 6px; font-size: 11px; letter-spacing: 1px;">ENVIRONMENT DESIGN</span>
+                        <span style="border: 1px solid var(--border); background: rgba(192,132,252,0.05); padding: 8px 15px; border-radius: 6px; font-size: 11px; letter-spacing: 1px;">HABIT NEUROSCIENCE</span>
+                        <span style="border: 1px solid var(--border); background: rgba(192,132,252,0.05); padding: 8px 15px; border-radius: 6px; font-size: 11px; letter-spacing: 1px;">DOPAMINE RESET</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 3px;">
+                        By Menwithandy — 2026 Edition
+                    </div>
+                </div>
+                <div style="position: relative;">
+                    <!-- SYMBOLIC SVG: Clock Gear with Internal Brain Structure -->
+                    <svg width="350" height="450" viewBox="0 0 100 120" style="filter: drop-shadow(0 0 30px rgba(192,132,252,0.2));">
+                        <defs>
+                            <linearGradient id="ironGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:var(--a1);stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:var(--a2);stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Gear Outline -->
+                        <path d="M50 10 L55 5 L65 5 L60 15 L70 18 L78 10 L88 15 L82 25 L90 32 L100 32 L100 42 L90 48 L92 58 L100 68 L92 78 L82 72 L75 80 L80 90 L70 100 L62 90 L52 92 L48 102 L38 100 L42 90 L32 88 L25 98 L15 92 L20 82 L10 75 L0 75 L0 65 L10 58 L8 48 L0 38 L8 28 L18 32 L25 25 L20 15 L30 5 L38 15 L48 12 Z" fill="none" stroke="url(#ironGrad)" stroke-width="0.5" opacity="0.4" />
+                        <!-- Central Core -->
+                        <circle cx="50" cy="53" r="22" fill="none" stroke="var(--a1)" stroke-width="1.5" />
+                        <path d="M35 53 Q35 35 50 35 Q65 35 65 53 Q65 71 50 71 Q35 71 35 53" fill="none" stroke="var(--a3)" stroke-width="0.8" />
+                        <line x1="50" y1="35" x2="50" y2="71" stroke="var(--a3)" stroke-width="0.5" />
+                        <line x1="35" y1="53" x2="65" y2="53" stroke="var(--a3)" stroke-width="0.5" />
+                        <!-- Animated Connections -->
+                        <circle cx="50" cy="35" r="2" fill="var(--a2)"><animate attributeName="r" values="1;2.5;1" dur="2s" repeatCount="indefinite"/></circle>
+                        <circle cx="65" cy="53" r="2" fill="var(--a1)"><animate attributeName="r" values="1;2.5;1" dur="2.5s" repeatCount="indefinite"/></circle>
+                    </svg>
+                    <!-- Floating Bubbles -->
+                    <div class="card" style="position: absolute; top: 15%; right: -20px; padding: 12px; transform: rotate(5deg);">
+                        <span class="stat-num" style="font-size: 20px;">92%</span>
+                        <span class="stat-label">FAILURE RATE</span>
+                    </div>
+                    <div class="card" style="position: absolute; bottom: 20%; left: -30px; padding: 12px; transform: rotate(-5deg);">
+                        <span class="stat-num" style="font-size: 20px;">66 DAYS</span>
+                        <span class="stat-label">NEW WIRING</span>
+                    </div>
+                    <div class="card" style="position: absolute; top: 50%; right: -40px; padding: 10px; transform: rotate(-10deg);">
+                        <span class="stat-num" style="font-size: 18px;">4AM</span>
+                        <span class="stat-label">NO NEGOTIATION</span>
+                    </div>
+                    <div class="card" style="position: absolute; bottom: 5%; right: 20px; padding: 10px; transform: rotate(8deg);">
+                        <span class="stat-num" style="font-size: 18px;">X10</span>
+                        <span class="stat-label">OUTPUT</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 02: INTRODUCTION -->
+    <div class="page" id="p2">
+        <div class="inner">
+            <div class="page-counter-top">02 / 16</div>
+            <h2 style="font-size: 36px; margin-bottom: 30px;">The <span style="color:var(--a1)">Willpower Trap</span></h2>
+            
+            <div class="stat-grid">
+                <div class="card stat-box">
+                    <span class="stat-num">45%</span>
+                    <span class="stat-label">Daily actions are automatic habits</span>
+                </div>
+                <div class="card stat-box">
+                    <span class="stat-num">3 HOURS</span>
+                    <span class="stat-label">Avg. time lost to distractions daily</span>
+                </div>
+                <div class="card stat-box">
+                    <span class="stat-num">20 SEC</span>
+                    <span class="stat-label">The friction window to stop a bad urge</span>
+                </div>
+                <div class="card stat-box">
+                    <span class="stat-num">500%</span>
+                    <span class="stat-label">Productivity boost in "Deep Flow"</span>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <p style="margin:0; font-family: var(--font-accent); font-size: 18px;"><strong>The Brutal Reality:</strong> Motivation is a chemical spike. Relying on it is like building a skyscraper on quicksand. This guide is about the <strong>concrete</strong>—the systems that work when your dopamine is at zero.</p>
+            </div>
+
+            <div class="grid-2" style="margin-top: 30px;">
+                <div class="card">
+                    <span class="card-title">What you will master</span>
+                    <ul style="font-size: 13px; color: var(--muted); padding-left: 18px;">
+                        <li style="margin-bottom:8px;">Cognitive Load Management to stop burnout.</li>
+                        <li style="margin-bottom:8px;">Environment Architecture for effortless focus.</li>
+                        <li style="margin-bottom:8px;">Identity-Based habit loops for long-term grit.</li>
+                        <li style="margin-bottom:8px;">The "Rule of 2" to never break a streak.</li>
+                        <li style="margin-bottom:8px;">Digital Minimalism as a weapon of war.</li>
+                        <li style="margin-bottom:8px;">Biological rhythm alignment for peak energy.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <span class="card-title">The Target Audience</span>
+                    <ul style="font-size: 13px; color: var(--muted); padding-left: 18px;">
+                        <li style="margin-bottom:8px;">The "Serial Starter" who quits by week 3.</li>
+                        <li style="margin-bottom:8px;">Entrepreneurs drowning in low-value tasks.</li>
+                        <li style="margin-bottom:8px;">Professionals seeking elite-level mental edge.</li>
+                        <li style="margin-bottom:8px;">Anyone tired of negotiating with their own mind.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card" style="text-align:center; padding: 15px;">
+                    <span style="font-size: 20px; color: var(--a3);">RARE DATA</span>
+                </div>
+                <div class="card" style="text-align:center; padding: 15px;">
+                    <span style="font-size: 20px; color: var(--a1);">NO FLUFF</span>
+                </div>
+                <div class="card" style="text-align:center; padding: 15px;">
+                    <span style="font-size: 20px; color: var(--a4);">HARD RESULTS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 03: FONDAMENTAUX -->
+    <div class="page" id="p3">
+        <div class="inner">
+            <div class="page-counter-top">03 / 16</div>
+            <h2 style="margin-bottom: 40px;">The Trinity of <span style="color:var(--a1)">Execution</span></h2>
+            
+            <div style="display: flex; justify-content: center; margin-bottom: 40px;">
+                <!-- Concentric Circles SVG for Hierarchy -->
+                <svg width="280" height="280" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--a1)" stroke-width="0.5" opacity="0.2" />
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="var(--a1)" stroke-width="0.5" opacity="0.4" />
+                    <circle cx="50" cy="50" r="15" fill="var(--card)" stroke="var(--a1)" stroke-width="1.5" />
+                    <text x="50" y="52" fill="var(--a1)" font-size="4" text-anchor="middle" font-family="Oswald">IDENTITY</text>
+                    <text x="50" y="28" fill="var(--a2)" font-size="4" text-anchor="middle" font-family="Oswald">SYSTEMS</text>
+                    <text x="50" y="12" fill="var(--muted)" font-size="4" text-anchor="middle" font-family="Oswald">ENVIRONMENT</text>
+                </svg>
+            </div>
+
+            <div class="highlight" style="text-align: center;">
+                <p><strong>CORE INSIGHT:</strong> You don't rise to the level of your goals; you fall to the level of your systems. Most people try to change the <i>outcome</i>. Elite performers change the <i>identity</i>.</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <span class="card-title">01. Identity</span>
+                    <p style="font-size: 12px; color: var(--muted);">Shift from "I want to be fit" to "I am an athlete." Your brain protects your self-image at all costs.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">02. Systems</span>
+                    <p style="font-size: 12px; color: var(--muted);">The set of non-negotiable rules that automate choices. Removing the need for "feeling like it."</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">03. Environment</span>
+                    <p style="font-size: 12px; color: var(--muted);">The physical space that makes good habits easy and bad habits invisible. Design beats discipline.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 04: CONCEPT 1 -->
+    <div class="page" id="p4">
+        <div class="inner">
+            <div class="page-counter-top">04 / 16</div>
+            <h2 style="margin-bottom: 30px;">Concept #1: <span style="color:var(--a1)">The Decision Bank</span></h2>
+            
+            <div class="stat-grid">
+                <div class="card stat-box">
+                    <span class="stat-num">35,000</span>
+                    <span class="stat-label">Decisions made daily</span>
+                </div>
+                <div class="card stat-box">
+                    <span class="stat-num">5:00 PM</span>
+                    <span class="stat-label">Peak Decision Fatigue</span>
+                </div>
+                <div class="card stat-box">
+                    <span class="stat-num">ZERO</span>
+                    <span class="stat-label">Willpower left by dusk</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <!-- Formula Visualization -->
+                <svg width="400" height="100" viewBox="0 0 400 100">
+                    <rect x="50" y="30" width="300" height="40" rx="20" fill="var(--card2)" stroke="var(--border)" />
+                    <text x="200" y="55" fill="var(--a1)" font-size="14" text-anchor="middle" font-family="Oswald">SUCCESS = (RESERVE - FRICTION) × FOCUS</text>
+                </svg>
+            </div>
+
+            <div class="check-item">
+                <div class="check-num">01</div>
+                <div>
+                    <span class="card-title">Static Mornings</span>
+                    <p style="font-size: 12px; margin:0;">Zero decisions until 10 AM. Pre-planned clothes, food, and 1st task.</p>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">02</div>
+                <div>
+                    <span class="card-title">The Evening Script</span>
+                    <p style="font-size: 12px; margin:0;">Write your top 3 needle-movers the night before. Don't think in the AM.</p>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">03</div>
+                <div>
+                    <span class="card-title">Choice Pruning</span>
+                    <p style="font-size: 12px; margin:0;">Standardize mundane decisions. Simplify your wardrobe and diet.</p>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">04</div>
+                <div>
+                    <span class="card-title">Batching Ops</span>
+                    <p style="font-size: 12px; margin:0;">Emails, calls, and admin in 1-hour blocks. Stop micro-tasking.</p>
+                </div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">05</div>
+                <div>
+                    <span class="card-title">Strategic "No"</span>
+                    <p style="font-size: 12px; margin:0;">Every "Yes" is a "No" to your primary mission. Guard your energy.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 05: CONCEPT 2 -->
+    <div class="page" id="p5">
+        <div class="inner">
+            <div class="page-counter-top">05 / 16</div>
+            <h2 style="margin-bottom: 30px;">Concept #2: <span style="color:var(--a1)">Dopamine Calibration</span></h2>
+            
+            <div style="display: flex; justify-content: center; margin-bottom: 40px;">
+                <!-- Spiral Progression SVG -->
+                <svg width="250" height="250" viewBox="0 0 100 100">
+                    <path d="M50 50 Q70 10 90 50 T50 90 T10 50 T50 10" fill="none" stroke="var(--a3)" stroke-width="0.5">
+                        <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite" />
+                    </path>
+                    <path d="M50 50 Q60 30 70 50 T50 70 T30 50 T50 30" fill="none" stroke="var(--a1)" stroke-width="1">
+                        <animateTransform attributeName="transform" type="rotate" from="360 50 50" to="0 50 50" dur="10s" repeatCount="indefinite" />
+                    </path>
+                    <circle cx="50" cy="50" r="5" fill="var(--a2)" />
+                </svg>
+            </div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <span class="card-title">Cheap Rewards</span>
+                    <p style="font-size: 11px; color: var(--muted);">Social media, porn, sugar. They hijack your biological drive and kill your ambition.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">Delayed Bliss</span>
+                    <p style="font-size: 11px; color: var(--muted);">Earn your leisure. Reward yourself <i>after</i> the output. Train the brain to crave the hunt.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">The Reset</span>
+                    <p style="font-size: 11px; color: var(--muted);">24 hours of boredom. No screens, no caffeine. Recalibrate your sensitivity to simple tasks.</p>
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 30px; border-left: 4px solid var(--a3);">
+                <p style="margin:0; font-size: 14px;"><strong>Golden Rule:</strong> If you are bored, you are ready to work. If you are over-stimulated, you are ready to procrastinate.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 06: CONCEPT 3 -->
+    <div class="page" id="p6">
+        <div class="inner">
+            <div class="page-counter-top">06 / 16</div>
+            <h2 style="margin-bottom: 30px;">Concept #3: <span style="color:var(--a1)">Biological Leverage</span></h2>
+            
+            <div style="text-align:center; margin-bottom: 40px;">
+                <!-- Venn Diagram for Concept -->
+                <svg width="300" height="200" viewBox="0 0 120 80">
+                    <circle cx="45" cy="40" r="25" fill="var(--a1)" opacity="0.2" stroke="var(--a1)" />
+                    <circle cx="75" cy="40" r="25" fill="var(--a2)" opacity="0.2" stroke="var(--a2)" />
+                    <circle cx="60" cy="55" r="25" fill="var(--a3)" opacity="0.2" stroke="var(--a3)" />
+                    <text x="35" y="35" fill="var(--text)" font-size="4" font-family="Oswald">SLEEP</text>
+                    <text x="85" y="35" fill="var(--text)" font-size="4" font-family="Oswald">LIGHT</text>
+                    <text x="60" y="70" fill="var(--text)" font-size="4" font-family="Oswald">FOOD</text>
+                    <text x="60" y="45" fill="var(--a3)" font-size="5" text-anchor="middle" font-family="Oswald">PEAK FOCUS</text>
+                </svg>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <span class="card-title">Circadian Anchoring</span>
+                <p style="font-size: 14px;">View sunlight within 30 minutes of waking. This sets your cortisol and melatonin timers. Without this, your discipline is fighting your biology. You will lose.</p>
+            </div>
+            
+            <div class="card">
+                <span class="card-title">The 90-Min Ultradian Cycle</span>
+                <p style="font-size: 14px;">Work for 90 minutes. Stop for 15. Your brain cannot maintain high-frequency firing beyond this window. Respect the cycle or pay in burnout.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 07: 7 STEPS -->
+    <div class="page" id="p7">
+        <div class="inner">
+            <div class="page-counter-top">07 / 16</div>
+            <h2 style="margin-bottom: 30px;">The 7-Step <span style="color:var(--a1)">Forging Process</span></h2>
+            
+            <div class="check-item">
+                <div class="check-num">01</div>
+                <div><b>Identity Definition:</b> Write down who you are becoming in 3 words.</div>
+            </div>
+            <div class="check-item" style="border-left-color: var(--a2);">
+                <div class="check-num">02</div>
+                <div><b>Environment Audit:</b> Remove every trigger of your bad habits.</div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">03</div>
+                <div><b>Friction Engineering:</b> Make the hard task take 1 step to start.</div>
+            </div>
+            <div class="check-item" style="border-left-color: var(--a2);">
+                <div class="check-num">04</div>
+                <div><b>The Morning 4:</b> Set 4 non-negotiable tasks for the first 2 hours.</div>
+            </div>
+            <div class="check-item">
+                <div class="check-num">05</div>
+                <div><b>Deep Work Sanctuary:</b> A dedicated space where ONLY work happens.</div>
+            </div>
+            <div class="check-item" style="border-left-color: var(--a2);">
+                <div class="check-num">06</div>
+                <div><b>Dopamine Cleanse:</b> Limit high-stimulation activity until 6 PM.</div>
+            </div>
+            <div class="check-item" style="border-left-color: var(--a3);">
+                <div class="check-num">07</div>
+                <div><b>The Sunday Review:</b> Analyze the data. Adjust the system. Repeat.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 08: TOOLS -->
+    <div class="page" id="p8">
+        <div class="inner">
+            <div class="page-counter-top">08 / 16</div>
+            <h2 style="margin-bottom: 30px;">The Iron <span style="color:var(--a1)">Tech Stack</span></h2>
+            <div class="grid-2">
+                <div class="card">
+                    <span class="card-title">Freedom.to</span>
+                    <p style="font-size: 11px;">Blocks social media across all devices. No negotiation.</p>
+                    <span class="badge" style="font-size: 8px;">ENFORCEMENT</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Opal</span>
+                    <p style="font-size: 11px;">The digital screen time inhibitor. Hard-locks apps.</p>
+                    <span class="badge" style="font-size: 8px;">CONTROL</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Notion</span>
+                    <p style="font-size: 11px;">Central OS for your systems and habit tracking.</p>
+                    <span class="badge" style="font-size: 8px;">STRUCTURE</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Brain.fm</span>
+                    <p style="font-size: 11px;">Functional music to induce alpha brain waves.</p>
+                    <span class="badge" style="font-size: 8px;">BIOLOGY</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Eight Sleep</span>
+                    <p style="font-size: 11px;">Thermal regulation for 100% sleep efficiency.</p>
+                    <span class="badge" style="font-size: 8px;">RECOVERY</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">RescueTime</span>
+                    <p style="font-size: 11px;">Tracks where every minute of your attention goes.</p>
+                    <span class="badge" style="font-size: 8px;">DATA</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Superhuman</span>
+                    <p style="font-size: 11px;">Email processing at the speed of thought.</p>
+                    <span class="badge" style="font-size: 8px;">VELOCITY</span>
+                </div>
+                <div class="card">
+                    <span class="card-title">Cold Turkey</span>
+                    <p style="font-size: 11px;">Blunts the internet until the work is done.</p>
+                    <span class="badge" style="font-size: 8px;">FOCUS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 09: PLAN 90 DAYS -->
+    <div class="page" id="p9">
+        <div class="inner">
+            <div class="page-counter-top">09 / 16</div>
+            <h2 style="margin-bottom: 40px;">The 90-Day <span style="color:var(--a1)">Hard Reset</span></h2>
+            
+            <!-- Horizontal Timeline SVG -->
+            <svg width="100%" height="80" viewBox="0 0 800 80">
+                <line x1="50" y1="40" x2="750" y2="40" stroke="var(--muted)" stroke-width="2" />
+                <circle cx="50" cy="40" r="10" fill="var(--a1)" />
+                <circle cx="400" cy="40" r="10" fill="var(--a2)" />
+                <circle cx="750" cy="40" r="10" fill="var(--a3)" />
+                <text x="50" y="70" fill="var(--a1)" font-family="Oswald" text-anchor="middle">DAY 0-30</text>
+                <text x="400" y="70" fill="var(--a2)" font-family="Oswald" text-anchor="middle">DAY 31-60</text>
+                <text x="750" y="70" fill="var(--a3)" font-family="Oswald" text-anchor="middle">DAY 61-90</text>
+            </svg>
+
+            <div class="grid-3">
+                <div class="card">
+                    <span class="card-title">Purge Phase</span>
+                    <p style="font-size: 11px;">Eliminate bad dopamine loops. Reset sleep cycle. Empty the physical environment of junk.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">Anchor Phase</span>
+                    <p style="font-size: 11px;">Install the "Morning 4". Build the streak. 100% consistency over 100% intensity.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">Mastery Phase</span>
+                    <p style="font-size: 11px;">Layer on advanced tools. Double the workload. Automate or delegate low-value tasks.</p>
+                </div>
+            </div>
+
+            <div class="highlight" style="margin-top: 30px;">
+                <p style="text-align: center; margin:0; font-weight: bold;">NEVER MISS TWICE. One miss is a mistake. Two misses is the start of a new habit.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 10: IDEAL DAY -->
+    <div class="page" id="p10">
+        <div class="inner">
+            <div class="page-counter-top">10 / 16</div>
+            <h2 style="margin-bottom: 30px;">The <span style="color:var(--a1)">Systemic Day</span></h2>
+            
+            <div style="position: relative; padding-left: 30px; border-left: 2px dashed var(--muted);">
+                <div style="margin-bottom: 20px;">
+                    <span style="position: absolute; left: -10px; width: 18px; height: 18px; background: var(--a1); border-radius: 50%;"></span>
+                    <b style="color: var(--a1);">05:00 AM — No-Input Window</b>
+                    <p style="font-size: 12px; margin: 4px 0;">Sunlight + Hydration. No phone. Protect your cognitive silence.</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span style="position: absolute; left: -10px; width: 18px; height: 18px; background: var(--a1); border-radius: 50%;"></span>
+                    <b style="color: var(--a1);">06:30 AM — Deep Work Block I</b>
+                    <p style="font-size: 12px; margin: 4px 0;">90 mins on the "One Thing." The task that makes everything else easier.</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span style="position: absolute; left: -10px; width: 18px; height: 18px; background: var(--a2); border-radius: 50%;"></span>
+                    <b style="color: var(--a2);">10:00 AM — Shallow Work / Admin</b>
+                    <p style="font-size: 12px; margin: 4px 0;">Emails, meetings, Slack. Use lower energy for reactive tasks.</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span style="position: absolute; left: -10px; width: 18px; height: 18px; background: var(--a3); border-radius: 50%;"></span>
+                    <b style="color: var(--a3);">02:00 PM — Physical Stress</b>
+                    <p style="font-size: 12px; margin: 4px 0;">Lift, run, or train. High intensity to reset focus for PM block.</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <span style="position: absolute; left: -10px; width: 18px; height: 18px; background: var(--a4); border-radius: 50%;"></span>
+                    <b style="color: var(--a4);">08:30 PM — Screen Shutdown</b>
+                    <p style="font-size: 12px; margin: 4px 0;">Dim lights. Prep for tomorrow. No blue light allowed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 11: 9 TIPS -->
+    <div class="page" id="p11">
+        <div class="inner">
+            <div class="page-counter-top">11 / 16</div>
+            <h2 style="margin-bottom: 30px;">9 Expert <span style="color:var(--a1)">Directives</span></h2>
+            <div class="grid-3">
+                <div class="card" style="font-size: 11px;"><b>1. 2-Min Rule</b><br>If it takes 2 mins, do it now. Don't add it to the list.</div>
+                <div class="card" style="font-size: 11px;"><b>2. Phone Jail</b><br>Keep your phone in a separate room during work.</div>
+                <div class="card" style="font-size: 11px;"><b>3. Cold Exposure</b><br>3 mins cold shower to kill mental resistance.</div>
+                <div class="card" style="font-size: 11px;"><b>4. Rule of 3</b><br>Only 3 major wins per day. The rest is bonus.</div>
+                <div class="card" style="font-size: 11px;"><b>5. Social Fasting</b><br>Delete apps. Access social only via desktop browser.</div>
+                <div class="card" style="font-size: 11px;"><b>6. Power Naps</b><br>20 mins max between 1 PM and 3 PM.</div>
+                <div class="card" style="font-size: 11px;"><b>7. Pre-Commitment</b><br>Tell a peer your goal. Add a financial penalty.</div>
+                <div class="card" style="font-size: 11px;"><b>8. Zero-Inbox</b><br>Process, don't store. Act, Delete, or Schedule.</div>
+                <div class="card" style="font-size: 11px;"><b>9. Gratitude Gap</b><br>Review wins before bed. Dopamine for sleep.</div>
+            </div>
+            <div class="highlight" style="margin-top: 25px;">
+                <p style="margin:0; text-align: center;"><strong>THE UNDERRATED TIP:</strong> Boring is profitable. Success is usually the result of doing the same "boring" high-ROI tasks for years.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 12: FATAL ERRORS -->
+    <div class="page" id="p12">
+        <div class="inner">
+            <div class="page-counter-top">12 / 16</div>
+            <h2 style="margin-bottom: 30px;">The <span style="color:var(--a4)">Sabotage</span> Table</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--a1);">
+                        <th style="padding: 15px; text-align: left; font-family: var(--font-title); color: var(--a4);">FATAL ERROR</th>
+                        <th style="padding: 15px; text-align: left; font-family: var(--font-title); color: var(--a3);">SYSTEMIC FIX</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--card-border);">
+                        <td style="padding: 15px; font-size: 13px;">Waiting for "Inspiration"</td>
+                        <td style="padding: 15px; font-size: 13px;">Stick to the scheduled time. Professionals show up.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--card-border);">
+                        <td style="padding: 15px; font-size: 13px;">Over-planning V1</td>
+                        <td style="padding: 15px; font-size: 13px;">The "Rough Draft" rule. Action over perfection.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--card-border);">
+                        <td style="padding: 15px; font-size: 13px;">The "Just This Once" Pass</td>
+                        <td style="padding: 15px; font-size: 13px;">Identity Protection. You don't negotiate with yourself.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--card-border);">
+                        <td style="padding: 15px; font-size: 13px;">Digital Clutter</td>
+                        <td style="padding: 15px; font-size: 13px;">Hard block apps. Remove the possibility of failure.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--card-border);">
+                        <td style="padding: 15px; font-size: 13px;">Sacrificing Sleep</td>
+                        <td style="padding: 15px; font-size: 13px;">Sleep is non-negotiable. It's the cognitive fuel.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 13: DASHBOARD -->
+    <div class="page" id="p13">
+        <div class="inner">
+            <div class="page-counter-top">13 / 16</div>
+            <h2 style="margin-bottom: 30px;">Tracking the <span style="color:var(--a1)">Ghost</span></h2>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <!-- Progression Radar/Pulse SVG -->
+                <svg width="300" height="150" viewBox="0 0 300 150">
+                    <polyline points="0,100 40,90 80,110 120,40 160,60 200,20 240,40 300,10" fill="none" stroke="var(--a1)" stroke-width="3" />
+                    <circle cx="200" cy="20" r="5" fill="var(--a3)" />
+                    <text x="200" y="15" fill="var(--a3)" font-size="8" text-anchor="middle">PEAK OUTPUT</text>
+                </svg>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <span class="card-title">Weekly KPIs</span>
+                    <div style="margin-bottom:10px;">
+                        <span style="font-size:10px; color:var(--muted);">Deep Work Hours</span>
+                        <div style="width:100%; height:8px; background:var(--bg2); border-radius:4px; margin-top:4px;">
+                            <div style="width:75%; height:100%; background:var(--a1); border-radius:4px;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:10px;">
+                        <span style="font-size:10px; color:var(--muted);">Habit Consistency</span>
+                        <div style="width:100%; height:8px; background:var(--bg2); border-radius:4px; margin-top:4px;">
+                            <div style="width:90%; height:100%; background:var(--a2); border-radius:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <span class="card-title">Danger Zones</span>
+                    <p style="font-size: 11px;"><span style="color:var(--a4);">Red:</span> 3 days without training.</p>
+                    <p style="font-size: 11px;"><span style="color:var(--a3);">Yellow:</span> Screen time > 4 hours.</p>
+                    <p style="font-size: 11px;"><span style="color:var(--a1);">Green:</span> Morning 4 completed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 14: LONG TERM -->
+    <div class="page" id="p14">
+        <div class="inner">
+            <div class="page-counter-top">14 / 16</div>
+            <h2 style="margin-bottom: 30px;">The <span style="color:var(--a1)">Compounding Flywheel</span></h2>
+            
+            <div style="display:flex; justify-content:center; margin-bottom: 40px;">
+                <!-- Circular Flywheel SVG -->
+                <svg width="200" height="200" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="var(--muted)" stroke-width="0.5" stroke-dasharray="2" />
+                    <g fill="var(--a1)">
+                        <circle cx="50" cy="10" r="4" />
+                        <circle cx="90" cy="50" r="4" />
+                        <circle cx="50" cy="90" r="4" />
+                        <circle cx="10" cy="50" r="4" />
+                    </g>
+                    <text x="50" y="53" fill="var(--text)" font-size="6" text-anchor="middle" font-family="Oswald">MOMENTUM</text>
+                    <path d="M50 10 A 40 40 0 0 1 90 50" fill="none" stroke="var(--a2)" stroke-width="3" />
+                </svg>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <span class="card-title">Authority</span>
+                    <p style="font-size: 12px;">Discipline builds competence. Competence builds authority. Authority builds wealth.</p>
+                </div>
+                <div class="card">
+                    <span class="card-title">Monetization</span>
+                    <p style="font-size: 12px;">Your ability to focus is your highest value asset in an economy of distraction.</p>
+                </div>
+            </div>
+            
+            <div class="grid-3" style="margin-top:20px;">
+                <div class="card" style="text-align:center;">Network</div>
+                <div class="card" style="text-align:center;">Brand</div>
+                <div class="card" style="text-align:center;">Legacy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 15: CASE STUDY -->
+    <div class="page" id="p15">
+        <div class="inner">
+            <div class="page-counter-top">15 / 16</div>
+            <h2 style="margin-bottom: 30px;">Real Results: <span style="color:var(--a1)">The 6-Month Shift</span></h2>
+            
+            <div class="grid-2" style="margin-bottom: 30px;">
+                <div class="card" style="border-left: 3px solid var(--a4);">
+                    <span class="card-title" style="color:var(--a4);">BEFORE SYSTEM</span>
+                    <p style="font-size: 11px;">"Waking up at 9 AM, checking phone immediately. Feeling behind by 10 AM. Quitting the gym by the second week of every month. Living on caffeine and anxiety."</p>
+                    <span class="stat-num" style="font-size: 18px; color:var(--a4);">$0 Revenue</span>
+                </div>
+                <div class="card" style="border-left: 3px solid var(--a1);">
+                    <span class="card-title">AFTER SYSTEM</span>
+                    <p style="font-size: 11px;">"5 AM wake-up. 3 hours of Deep Work done before the world wakes up. Physical training 5x/week. Zero decision fatigue. 10x the output with 2x the energy."</p>
+                    <span class="stat-num" style="font-size: 18px;">$15k/mo Rev</span>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card"><span class="card-title">Decision 1</span><p style="font-size:11px;">Locked phone in a timed kitchen safe from 8 PM to 8 AM.</p></div>
+                <div class="card"><span class="card-title">Decision 2</span><p style="font-size:11px;">Hired an accountability partner with a $500 penalty per miss.</p></div>
+                <div class="card"><span class="card-title">Decision 3</span><p style="font-size:11px;">Pruned social circles. Only hung out with high-performers.</p></div>
+                <div class="card"><span class="card-title">Decision 4</span><p style="font-size:11px;">Standardized daily meals to remove food decisions.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 16: SUMMARY + CTA -->
+    <div class="page" id="p16">
+        <div class="inner">
+            <div class="page-counter-top">16 / 16</div>
+            
+            <div class="grid-3">
+                <div class="card" style="text-align:center;">Identify</div>
+                <div class="card" style="text-align:center;">Design</div>
+                <div class="card" style="text-align:center;">Enforce</div>
+                <div class="card" style="text-align:center;">Measure</div>
+                <div class="card" style="text-align:center;">Scale</div>
+                <div class="card" style="text-align:center;">Dominate</div>
+            </div>
+
+            <div class="highlight" style="text-align: center; margin-top: 30px;">
+                <h3 style="color: var(--a3);">3 ACTIONS FOR TODAY</h3>
+                <p style="font-size: 14px;">1. Move your phone charger to another room.<br>2. Block 90 mins for tomorrow AM.<br>3. Commit to ONE identity-shift phrase.</p>
+            </div>
+
+            <!-- <div class="cta-box" style="margin-top: 30px;">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--a1)" stroke-width="1" style="margin-bottom: 20px;">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="rgba(192,132,252,0.1)" />
+                </svg>
+                <h2>Ready to <span style="color:var(--a1);">Forge Your Future</span>?</h2>
+                <p style="color:var(--muted); font-size: 14px; margin: 15px 0 25px;">The system works if you do. Join the Elite Circle for 1-on-1 implementation coaching and the full resource vault.</p>
+                <a href="https://tonsite.com/offre" class="cta-btn">Join the Program</a>
+            </div> -->
+
+            <footer style="margin-top: 50px; text-align: center; font-size: 10px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 20px;">
+                © 2026 Menwithandy — Iron Discipline: The System<br>All Rights Reserved.
+            </footer>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="nav-bar">
+        <button class="nav-btn" id="prevBtn">Prev</button>
+        <div class="dots" id="dots"></div>
+        <div style="font-family: var(--font-title); font-size: 12px; min-width: 50px; text-align: center;" id="pageCounter">01 / 16</div>
+        <button class="nav-btn" id="nextBtn">Next</button>
+    </div>
+
+    <script>
+        const totalPages = 16;
+        let currentPage = 1;
+
+        const dotsContainer = document.getElementById('dots');
+        for (let i = 1; i <= totalPages; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 1) dot.classList.add('active');
+            dot.onclick = () => goToPage(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`p${currentPage}`).classList.add('active');
+            
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('active', i + 1 === currentPage);
+            });
+
+            document.getElementById('pageCounter').innerText = `${currentPage.toString().padStart(2, '0')} / ${totalPages}`;
+            window.scrollTo(0, 0);
+        }
+
+        function goToPage(p) {
+            if (p < 1 || p > totalPages) return;
+            currentPage = p;
+            updateUI();
+        }
+
+        document.getElementById('prevBtn').onclick = () => goToPage(currentPage - 1);
+        document.getElementById('nextBtn').onclick = () => goToPage(currentPage + 1);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goToPage(currentPage - 1);
+            if (e.key === 'ArrowRight') goToPage(currentPage + 1);
+        });
+    </script>
+</body>
+</html>
